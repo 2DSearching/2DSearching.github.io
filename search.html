@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>2D Поиск</title>
+</head>
+<body>
+  <form id="postForm" method="post" action="/redirect">
+    <label>Что ищем? <input type="text" name="q"></label>
+    <input type="submit" value="На поиски!">
+  </form>
+
+  <script>
+    // Wait for the page to load
+    window.onload = function() {
+      // Add an event listener to the form submission
+      document.getElementById("postForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent form from being submitted
+
+        // Get the value of the input field
+        var searchQuery = document.getElementsByName("q")[0].value;
+
+        // Create a hidden form to send a POST request
+        var hiddenForm = document.createElement("form");
+        hiddenForm.action = "https://google.com/search?q=" + encodeURIComponent(searchQuery);
+        hiddenForm.method = "post";
+
+        // Create an input element to hold the value of q
+        var hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = "q";
+        hiddenInput.value = searchQuery;
+
+        // Append the input element to the form and submit it
+        hiddenForm.appendChild(hiddenInput);
+        document.body.appendChild(hiddenForm);
+        hiddenForm.submit();
+      });
+    };
+  </script>
+</body>
+</html>
