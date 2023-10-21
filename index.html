@@ -1,50 +1,791 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>2D Поиск</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    form {
-      margin-top: 50px;
-      text-align: center;
-    }
-
-    input[type="text"] {
-      width: 400px;
-      padding: 10px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
-</head>
-<body>
-  <h1>Поиск</h1>
-  <form action="/search" method="GET">
-    <input type="text" name="query" placeholder="Запрос..." required>
-    <button type="submit">На поиски!</button>
-  </form>
-
-</body>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Ищем в 2D">
+		<meta name="author" content="2D">
+		<title>Поисковик 2D</title>
+		<!-- Favicons-->
+		<link rel="shortcut icon" href="//2d.su//favicon.ico" type="image/x-icon">
+		<link rel="apple-touch-icon" type="image/x-icon" href="/apple-touch-icon-57x57-precomposed.png">
+		<link rel="apple-touch-icon" type="image/x-icon" sizes="72x72" href="/apple-touch-icon-72x72-precomposed.png">
+		<link rel="apple-touch-icon" type="image/x-icon" sizes="114x114" href="/apple-touch-icon-114x114-precomposed.png">
+		<link rel="apple-touch-icon" type="image/x-icon" sizes="144x144" href="/apple-touch-icon-144x144-precomposed.png">
+		<!-- GOOGLE WEB FONT -->
+		<link href="./css/css2" rel="stylesheet">
+		<!-- BASE CSS -->
+		<link href="./css/bootstrap.min.css" rel="stylesheet">
+		<link href="./css/style.css" rel="stylesheet">
+		<link href="./css/menu.css" rel="stylesheet">
+		<link href="./css/vendors.css" rel="stylesheet">
+		<link href="./css/all_icons_min.css" rel="stylesheet">
+		<!-- CUSTOM CSS -->
+		<link href="./css/custom.css" rel="stylesheet">
+		<script type="text/javascript" async="" src="./js/ga.js"></script>
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-11097556-8']);
+			_gaq.push(['_trackPageview']);
+			
+			(function() {
+			    var ga = document.createElement('script');
+			    ga.type = 'text/javascript';
+			    ga.async = true;
+			    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			    var s = document.getElementsByTagName('script')[0];
+			    s.parentNode.insertBefore(ga, s);
+			})();
+		</script>
+		<style id="theia-sticky-sidebar-stylesheet-TSS">.theiaStickySidebar:after {content: ""; display: table; clear: both;}</style>
+		<style data-react-tooltip="true">.__react_component_tooltip {
+			border-radius: 3px;
+			display: inline-block;
+			font-size: 13px;
+			left: -999em;
+			opacity: 0;
+			padding: 8px 21px;
+			position: fixed;
+			pointer-events: none;
+			transition: opacity 0.3s ease-out;
+			top: -999em;
+			visibility: hidden;
+			z-index: 999;
+			}
+			.__react_component_tooltip.allow_hover, .__react_component_tooltip.allow_click {
+			pointer-events: auto;
+			}
+			.__react_component_tooltip::before, .__react_component_tooltip::after {
+			content: "";
+			width: 0;
+			height: 0;
+			position: absolute;
+			}
+			.__react_component_tooltip.show {
+			opacity: 0.9;
+			margin-top: 0;
+			margin-left: 0;
+			visibility: visible;
+			}
+			.__react_component_tooltip.place-top::before {
+			border-left: 10px solid transparent;
+			border-right: 10px solid transparent;
+			bottom: -8px;
+			left: 50%;
+			margin-left: -10px;
+			}
+			.__react_component_tooltip.place-bottom::before {
+			border-left: 10px solid transparent;
+			border-right: 10px solid transparent;
+			top: -8px;
+			left: 50%;
+			margin-left: -10px;
+			}
+			.__react_component_tooltip.place-left::before {
+			border-top: 6px solid transparent;
+			border-bottom: 6px solid transparent;
+			right: -8px;
+			top: 50%;
+			margin-top: -5px;
+			}
+			.__react_component_tooltip.place-right::before {
+			border-top: 6px solid transparent;
+			border-bottom: 6px solid transparent;
+			left: -8px;
+			top: 50%;
+			margin-top: -5px;
+			}
+			.__react_component_tooltip .multi-line {
+			display: block;
+			padding: 2px 0;
+			text-align: center;
+			}
+		</style>
+		<script src="./js/jquery-3.6.0.min.js"></script>
+	</head>
+	<body>
+		<!-- Меню моб версии -->
+		<!--<nav id="mm-menu" class="main-menu mm-menu mm-offcanvas mm-keyboardfocus mm-hasnavbar-bottom-1 mm-pagedim-black" aria-hidden="true">
+			<button class="mm-tabstart" tabindex="0" type="button" aria-hidden="true"></button>
+			<div class="mm-panels">
+				<div class="mm-panel mm-hasnavbar mm-opened" id="mm-1">
+					<div class="mm-navbar">
+						<a class="mm-title" tabindex="-1">Меню/a>
+					</div>
+					<ul class="mm-listview">
+						<li>
+							<a class="mm-next mm-fullsubopen" href="/?storefront=envato-elements#mm-2" aria-owns="mm-2" aria-haspopup="true" tabindex="0"><span class="mm-sronly">Open submenu (Home)</span></a><span><a href="#" tabindex="0">Home</a></span>
+						</li>
+						<li>
+							<a class="mm-next mm-fullsubopen" href="/?storefront=envato-elements#mm-3" aria-owns="mm-3" aria-haspopup="true" tab
+								="0"><span class="mm-sronly">Открыть подменю (Страницы)</span></a><span><a href="#" tabindex="0">Страницы</a></span>
+						</li>
+						<li>
+							<a class="mm-next mm-fullsubopen" href="/?storefront=envato-elements#mm-6" aria-owns="mm-6" aria-haspopup="true" tabindex="0"><span class="mm-sronly">Open submenu (Extra Elements)</span></a><span><a href="#" tabindex="0">Extra Elements</a></span>
+						</li>
+						<li><span><a href="/menu_2/index" tabindex="0">Menu V2</a></span></li>
+						<li><span><a href="/admin_section/index" target="_blank" tabindex="0">Адм</a></span></li>
+						<li><span><a href="/rss" target="_parent" tabindex="0">RSS</a></span></li>
+					</ul>
+				</div>
+				<div class="mm-panel mm-hidden mm-hasnavbar" id="mm-2" aria-hidden="true">
+					<div class="mm-navbar"><a class="mm-btn mm-prev" href="/?storefront=envato-elements#mm-1" aria-owns="mm-1" aria-haspopup="true" tabindex="-1"><span class="mm-sronly">Close submenu (Home)</span></a><a class="mm-title" href="/?storefront=envato-elements#mm-1" aria-hidden="true" tabindex="-1">Home</a></div>
+					<ul class="mm-listview">
+						<li><a href="/index" tabindex="-1">Home Default</a></li>
+						<li><a href="/index-2" tabindex="-1">Home Version 2</a></li>
+						<li><a href="/index-3" tabindex="-1">Home Version 3</a></li>
+						<li><a href="/index-4" tabindex="-1">Home Version 4</a></li>
+						<li><a href="/index-7" tabindex="-1">Home with Map</a></li>
+						<li><a href="/index-6" tabindex="-1">Revolution Slider</a></li>
+						<li><a href="/index-5" tabindex="-1">With Cookie Bar (EU law)</a></li>
+					</ul>
+				</div>
+				<div class="mm-panel mm-hidden mm-hasnavbar" id="mm-3" aria-hidden="true">
+					<div class="mm-navbar"><a class="mm-btn mm-prev" href="/?storefront=envato-elements#mm-1" aria-owns="mm-1" aria-haspopup="true" tabindex="-1"><span class="mm-sronly">Close submenu (Pages)</span></a><a class="mm-title" href="/?storefront=envato-elements#mm-1" aria-hidden="true" tabindex="-1">Pages</a></div>
+					<ul class="mm-listview">
+						<li>
+							<a class="mm-next mm-fullsubopen" href="/?storefront=envato-elements#mm-4" aria-owns="mm-4" aria-haspopup="true" tabindex="-1"><span class="mm-sronly">Open submenu (List pages)</span></a><span><a href="#" tabindex="-1">List pages</a></span>
+						</li>
+						<li>
+							<a class="mm-next mm-fullsubopen" href="/?storefront=envato-elements#mm-5" aria-owns="mm-5" aria-haspopup="true" tabindex="-1"><span class="mm-sronly">Open submenu (Detail pages)</span></a><span><a href="#" tabindex="-1">Detail pages</a></span>
+						</li>
+						<li><a href="/submit-review" tabindex="-1">Добавить отзыв</a></li>
+						<li><a href="/blog-1" tabindex="-1">Блог</a></li>
+						<li><a href="/badges" tabindex="-1">Значки</a></li>
+						<li><a href="/login" tabindex="-1">Авторизация</a></li>
+						<li><a href="/login-2" tabindex="-1">Авторизация 2</a></li>
+						<li><a href="/register-doctor" tabindex="-1">Зарегистрировать доктора</a></li>
+						<li><a href="/register-doctor-working" tabindex="-1">Реестр работающих врачей</a></li>
+						<li><a href="/register" tabindex="-1">Регистрация</a></li>
+						<li><a href="/about" tabindex="-1">О нас</a></li>
+						<li><a href="/contacts" tabindex="-1">Контакты</a></li>
+					</ul>
+				</div>
+				<div class="mm-panel mm-hidden mm-hasnavbar" id="mm-4" aria-hidden="true">
+					<div class="mm-navbar"><a class="mm-btn mm-prev" href="/?storefront=envato-elements#mm-3" aria-owns="mm-3" aria-haspopup="true" tabindex="-1"><span class="mm-sronly">Закрыть подменю (Листинг страниц)</span></a><a class="mm-title" href="/?storefront=envato-elements#mm-3" aria-hidden="true" tabindex="-1">List pages</a></div>
+					<ul class="mm-listview">
+						<li><a href="/list" tabindex="-1">Листинг страниц</a></li>
+						<li><a href="/grid-list" tabindex="-1">Страница сетки списка</a></li>
+						<li><a href="/list-map" tabindex="-1">List map page</a></li>
+					</ul>
+				</div>
+				<div class="mm-panel mm-hidden mm-hasnavbar" id="mm-5" aria-hidden="true">
+					<div class="mm-navbar"><a class="mm-btn mm-prev" href="/?storefront=envato-elements#mm-3" aria-owns="mm-3" aria-haspopup="true" tabindex="-1"><span class="mm-sronly">Закрыть подменю (Детализированные страницы)</span></a><a class="mm-title" href="/?storefront=envato-elements#mm-3" aria-hidden="true" tabindex="-1">Detail pages</a></div>
+					<ul class="mm-listview">
+						<li><a href="/detail-page" tabindex="-1">Страница сведений</a></li>
+						<li><a href="/detail-page-2" tabindex="-1">Страница 2</a></li>
+						<li><a href="/detail-page-working-booking" tabindex="-1">Детальное рабочее бронирование</a></li>
+					</ul>
+				</div>
+				<div class="mm-panel mm-hidden mm-hasnavbar" id="mm-6" aria-hidden="true">
+					<div class="mm-navbar"><a class="mm-btn mm-prev" href="/?storefront=envato-elements#mm-1" aria-owns="mm-1" aria-haspopup="true" tabindex="-1"><span class="mm-sronly">Закрыть подменю (Экстра-элементы)</span></a><a class="mm-title" href="/?storefront=envato-elements#mm-1" aria-hidden="true" tabindex="-1">Extra Elements</a></div>
+					<ul class="mm-listview">
+						<li><a href="/detail-page-working-booking" tabindex="-1">Detail working booking</a></li>
+						<li><a href="/booking-page" tabindex="-1">Booking page</a></li>
+						<li><a href="/confirm" tabindex="-1">Confirm page</a></li>
+						<li><a href="/faq" tabindex="-1">Faq page</a></li>
+						<li><a href="/coming_soon/index" tabindex="-1">Coming soon</a></li>
+						<li>
+							<a class="mm-next mm-fullsubopen" href="/?storefront=envato-elements#mm-7" aria-owns="mm-7" aria-haspopup="true" tabindex="-1"><span class="mm-sronly">Open submenu (Pricing tables)</span></a><span><a href="#" tabindex="-1">Таблица расценок</a></span>
+						</li>
+						<li><a href="/icon-pack-1" tabindex="-1">Икон пак 1</a></li>
+						<li><a href="/icon-pack-2" tabindex="-1">Икон пак 2</a></li>
+						<li><a href="/icon-pack-3" tabindex="-1">Икон пак 3</a></li>
+						<li><a href="/404" tabindex="-1">404 page</a></li>
+					</ul>
+				</div>
+				<div class="mm-panel mm-hidden mm-hasnavbar" id="mm-7" aria-hidden="true">
+					<div class="mm-navbar"><a class="mm-btn mm-prev" href="/?storefront=envato-elements#mm-6" aria-owns="mm-6" aria-haspopup="true" tabindex="-1"><span class="mm-sronly">Закрыть подменю (Pricing tables)</span></a><a class="mm-title" href="/?storefront=envato-elements#mm-6" aria-hidden="true" tabindex="-1">Pricing tables</a></div>
+					<ul class="mm-listview">
+						<li><a href="/pricing-tables" tabindex="-1">Прайсинг 1</a></li>
+						<li><a href="/pricing-tables-2" tabindex="-1">Прайсинг 2</a></li>
+						<li><a href="/pricing-tables-3" tabindex="-1">Прайсинг 3</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="mm-navbars-bottom">
+				<div class="mm-navbar mm-navbar-size-1"><a href="#">© 2022 2D Systems</a></div>
+			</div>
+			<button class="mm-tabend" tabindex="0" type="button" aria-hidden="true"></button>
+		</nav>-->
+		<div id="mm-0" class="mm-page mm-slideout">
+			<div id="page">
+				<header class="header_sticky">
+					<a href="/?storefront=envato-elements#menu" class="btn_mobile">
+						<div class="hamburger hamburger--spin" id="hamburger">
+							<div class="hamburger-box">
+								<div class="hamburger-inner"></div>
+							</div>
+						</div>
+					</a>
+					<!-- /btn_mobile-->
+					<div class="container">
+						<div class="row">
+							<div class="col-lg-3 col-6">
+								<div id="logo_home">
+									<h1><a href="/" title="2D Systems">2D</a></h1>
+								</div>
+							</div>
+							<!--<div class="col-lg-9 col-6">
+								<ul id="top_access">
+									<li><a href="/login"><i class="pe-7s-user"></i></a></li>
+									<li><a href="/register-doctor"><i class="pe-7s-add-user"></i></a></li>
+								</ul>
+								<nav id="menu" class="main-menu">
+									<ul>
+										<li>
+											<span><a href="#">Поиск</a></span>
+											<ul>
+												<li><a href="/">Сайты</a></li>
+												<li><a href="/">Изображения</a></li>
+												<li><a href="/">Видео</a></li>
+											</ul>
+										</li>
+										<li>
+											<span><a href="#">Прочие сервисы</a></span>
+											<ul>
+												<li>
+													<span><a href="#">Мониторинг игровых серверов</a></span>
+													<ul>
+														<li><a href="/list">Counter-Strike</a></li>
+														<li><a href="/grid-list">Grand Theft Auto</a></li>
+														<li><a href="/list-map">MineCraft</a></li>
+													</ul>
+												</li>
+												<li>
+													<span><a href="#">Хостинг</a></span>
+													<ul>
+														<li><a href="/detail-page">Выделенные серверы</a></li>
+														<li><a href="/detail-page-2">Виртуальные серверы</a></li>
+														<li><a href="/detail-page-3">Игровые серверы</a></li>
+														<li><a href="/detail-page-working-booking">Сайты</a></li>
+													</ul>
+												</li>
+												<li class="submenu">
+													<a href="#0" class="show-submenu">Extra Elements<i class="icon-down-open-mini"></i></a>
+													<ul>
+														<li><a href="booking-page.html">Букинг</a></li>
+														<li><a href="confirm.html">Страница подтверждения</a></li>
+														<li><a href="faq.html">FAQ</a></li>
+														<li><a href="coming_soon/index.html">Скоро</a></li>
+														<li class="third-level">
+															<a href="#0">Прайсы</a>
+															<ul>
+																<li><a href="pricing-tables.html">Таб 1</a></li>
+																<li><a href="pricing-tables-2.html">Таб 2</a></li>
+																<li><a href="pricing-tables-3.html">Таб 3</a></li>
+															</ul>
+														</li>
+														<li><a href="register-doctor-working.html">Воркинг регистр</a></li>
+														<li><a href="icon-pack-1.html">Икон пак 1</a></li>
+														<li><a href="icon-pack-2.html">Икон пак 2</a></li>
+														<li><a href="icon-pack-3.html">Икон пак 3</a></li>
+														<li><a href="404.html">404 page</a></li>
+													</ul>
+												</li>
+												<li><a href="/submit-review">Видео-Хостинг</a></li>
+											</ul>
+										</li>
+										<li><span><a href="/login" target="_blank">Войти</a></span></li>
+										<li><span><a href="/register" target="_parent">Регистрация</a></span></li>
+									</ul>
+								</nav>
+							</div>-->
+						</div>
+					</div>
+					<!-- /container -->
+				</header>
+				<!-- /header -->
+				<main>
+					<div class="hero_home version_1">
+						<div class="content">
+							<h3 class="fadeInUp animated">2D Поисковик</h3>
+							<p class="fadeInUp animated">
+								Найдём всё, что сможем.
+							</p>
+							<!--<form method="post" action="//google.com/search?q=" class="fadeInUp animated">-->
+								<div id="custom-search-input">
+									<div class="input-group">
+										<input id="search-query" type="text" class="search-query" placeholder="Что ищем сегодня?">
+										<input type="submit" class="btn_search" value="На поиски!" onclick="search_button()">
+										<script>
+											function search_button(){
+											
+											$("input[name=search_service]").each(function (index, el){
+												if ($(el).is(':checked')){
+													search_service = $(el).val();
+												}
+											});
+											$("input[name=search_type]").each(function (index, el){
+												if ($(el).is(':checked')){
+													search_type = $(el).val();
+												}
+											});
+											
+											
+											
+											if (search_service=="google") {
+												if (search_type=="sites") {
+													var search_address = "https://google.ru/search?q=";
+												}
+												else if (search_type=="images") {
+													var search_address = "https://google.ru/search?tbm=isch&q=";
+												}
+												else if (search_type=="video") {
+													var search_address = "https://google.ru/search?tbm=vid&q=";
+												}
+											}
+											else if (search_service=="yandex") {
+												if (search_type=="sites") {
+													var search_address = "https://ya.ru/search?text=";
+												}
+												else if (search_type=="images") {
+													var search_address = "https://ya.ru/images/search?text=";
+												}
+												else if (search_type=="video") {
+													var search_address = "https://ya.ru/video/search?text=";
+												}
+											}
+											else if (search_service=="duckduckgo") {
+												if (search_type=="sites") {
+													var search_address = "https://duckduckgo.com/?q=";
+												}
+												else if (search_type=="images") {
+													var search_address = "https://duckduckgo.com/?iax=images&ia=images&q=";
+												}
+												else if (search_type=="video") {
+													var search_address = "https://duckduckgo.com/?iax=videos&ia=videos&q=";
+												}
+											}
+											window.location.href = search_address+$('.search-query').val();
+											}
+											
+											function setCookie(cookieName, cookieValue) {
+											  document.cookie = cookieName + "=" + cookieValue;
+											}
+											
+											function getCookie(name) {
+											  var value = "; " + document.cookie;
+											  var parts = value.split("; " + name + "=");
+											  if (parts.length == 2) return parts.pop().split(";").shift();
+											}
+											
+											function active_radio(name, id) {
+												$('input[name='+name+']').removeAttr('checked');
+												$('input#'+id+'[name='+name+']').prop('checked', true);
+											}
+											
+											$(function() {
+												if (getCookie("search_service")) {
+													active_radio('search_service', getCookie("search_service"));
+												}
+												else {
+													active_radio('search_service', 'google');
+												}
+												active_radio('search_type', 'sites');
+												$('#search-query').keypress(function(e) {
+												var key = e.which;
+												if (key == 13) // the enter key code
+												{
+												  search_button();
+												  return false;
+												}
+											  });
+											});
+											
+										</script>
+									</div>
+									<!--<div class="gcse-search">
+										<script async src="https://cse.google.com/cse.js?cx=9776c0ead13a14742"></script>
+									</div>-->
+									<br>
+									<ul>
+										Тип поиска:<br>
+										<li>
+											<input type="radio" id="sites" name="search_type" value="sites">
+											<label for="sites">Сайты</label>
+										</li>
+										<li>
+											<input type="radio" id="images" name="search_type" value="images">
+											<label for="images">Изображения</label>
+										</li>
+										<li>
+											<input type="radio" id="video" name="search_type" value="video">
+											<label for="video">Видео</label>
+										</li>
+									</ul>
+									<ul>
+										Поисковый сервис:<br>
+										<li>
+											<input type="radio" id="google" name="search_service" value="google" onclick="setCookie('search_service','google')">
+											<label for="google">Google</label>
+										</li>
+										<li>
+											<input type="radio" id="yandex" name="search_service" value="yandex" onclick="setCookie('search_service','yandex')">
+											<label for="yandex">Яндекс</label>
+										</li>
+										<li>
+											<input type="radio" id="duckduckgo" name="search_service" value="duckduckgo" onclick="setCookie('search_service','duckduckgo')">
+											<label for="duckduckgo">DuckDuckGo</label>
+										</li>
+									</ul>
+								</div>
+							<!--</form>-->
+						</div>
+					</div>
+					<!-- /Hero -->
+					<!--<div class="container margin_120_95">
+						<div class="main_title">
+							<h2>Попробуйте наш новый <strong>хостинг</strong> сервис!</h2>
+							<p>Различные локации, техническая поддержка, разные ценовые сегменты, мониторинг и куча полезных функций</p>
+						</div>
+						<div class="row add_bottom_30">
+							<div class="col-lg-4">
+								<div class="box_feat" id="icon_1">
+									<span></span>
+									<h3>Локации</h3>
+									<p>На данный момент наши серверы размещены в таких городах, как Новосибирск, Казань и Альметьевск</p>
+								</div>
+							</div>
+							<div class="col-lg-4">
+								<div class="box_feat" id="icon_2">
+									<span></span>
+									<h3>Провайдеры</h3>
+									<p>Мы сотрудничаем с Эр-Телеком, МТС, Ростелеком, Мегафон, Таттелеком, Милеком и другими.</p>
+								</div>
+							</div>
+							<div class="col-lg-4">
+								<div class="box_feat" id="icon_3">
+									<h3>Техническая поддержка</h3>
+									<p>Сотрудники в сети 24/7 и готовы помочь решить любую проблему по вашим услугам.</p>
+								</div>
+							</div>
+						</div>
+						<p class="text-center"><a href="//hosting.2d.su/?from=search.2d.su" class="btn_1 medium">Попробовать</a></p>
+					</div>-->
+					<!-- /container -->
+					<!--<div class="bg_color_1">
+						<div class="container margin_120_95">
+							<div class="main_title">
+								<h2>Новый мониторинг игровых серверов</h2>
+								<p>Подберём игроку сервер для любой игры, а администраторам поможем популяризировать их сервер</p>
+							</div>
+							<div id="reccomended" class="owl-carousel owl-theme owl-loaded owl-drag">
+								<div class="owl-stage-outer">
+									<div class="owl-stage" style="transition: all 0s ease 0s; width: 4245px; transform: translate3d(-816px, 0px, 0px);">
+										<div class="owl-item cloned" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>120</div>
+													<div class="title">
+														<h4>Counter-Strike<em>1.6</em></h4>
+													</div>
+													<img src="./img/games/cs16.jpg" alt="Counter-Strike 1.6">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item cloned" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>115</div>
+													<div class="title">
+														<h4>Counter-Strike<em>Global Offensive</em></h4>
+													</div>
+													<img src="./img/games/csgo.jpeg" alt="">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item cloned" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>98</div>
+													<div class="title">
+														<h4>Counter-Strike<em>Source</em></h4>
+													</div>
+													<img src="./img/games/css.jpg" alt="">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item cloned active" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>98</div>
+													<div class="title">
+														<h4>Counter-Strike<em>Source v34</em></h4>
+													</div>
+													<img src="./img/games/css34.jpg" alt="">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item active center" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>140</div>
+													<div class="title">
+														<h4>Grand Theft Auto<em>IV MultiPlayer</em></h4>
+													</div>
+													<img src="./img/games/gta4.jpg" alt="GTA4">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item active" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>120</div>
+													<div class="title">
+														<h4>Grand Theft Auto<em>V RolePlay</em></h4>
+													</div>
+													<img src="./img/games/gta5.jpg" alt="GTA5">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item active" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>115</div>
+													<div class="title">
+														<h4>Grand Theft Auto<em>San Andreas MultiPlayer</em></h4>
+													</div>
+													<img src="./img/games/gtasa.jfif" alt="GTASA">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>98</div>
+													<div class="title">
+														<h4>Half-Life<em>2: Episode 2</em></h4>
+													</div>
+													<img src="./img/games/hl2_2.jpg" alt="HL">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>98</div>
+													<div class="title">
+														<h4>Half-Life<em>Alyx</em></h4>
+													</div>
+													<img src="./img/games/hl_alyx.jpg" alt="Alyx">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item cloned" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>140</div>
+													<div class="title">
+														<h4>Half-Life<em>2</em></h4>
+													</div>
+													<img src="./img/games/hl2.jpg" alt="HL">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item cloned" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>120</div>
+													<div class="title">
+														<h4>Minecraft<em>PC</em></h4>
+													</div>
+													<img src="./img/games/mc.jpg" alt="MC">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item cloned" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>115</div>
+													<div class="title">
+														<h4>Minecraft<em>Pocket Edition</em></h4>
+													</div>
+													<img src="./img/games/mcpe.webp" alt="MCPE">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item cloned" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>98</div>
+													<div class="title">
+														<h4>Play Unknown<em>BattleGround</em></h4>
+													</div>
+													<img src="./img/games/pubg.jpg" alt="PUBG">
+												</a>
+											</div>
+										</div>
+										<div class="owl-item" style="width: 316.5px; margin-right: 10px;">
+											<div class="item">
+												<a href="/detail-page">
+													<div class="views"><i class="icon-eye-7"></i>98</div>
+													<div class="title">
+														<h4>Rust</h4>
+													</div>
+													<img src="./img/games/rust.jpg" alt="Rust">
+												</a>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="owl-nav disabled"><button type="button" role="presentation" class="owl-prev"><span aria-label="Previous">‹</span></button><button type="button" role="presentation" class="owl-next"><span aria-label="Next">›</span></button></div>
+								<div class="owl-dots"><button role="button" class="owl-dot active"><span></span></button><button role="button" class="owl-dot"><span></span></button><button role="button" class="owl-dot"><span></span></button><button role="button" class="owl-dot"><span></span></button><button role="button" class="owl-dot"><span></span></button></div>
+							</div>
+						</div>
+					</div>-->
+					<!-- /white_bg -->
+					
+					<!--<div class="container margin_120_95">
+						<div class="main_title">
+							<h2>Find your doctor or clinic</h2>
+							<p>Nec graeci sadipscing disputationi ne, mea ea nonumes percipitur. Nonumy ponderum oporteat cu mel, pro movet cetero at.</p>
+						</div>
+						<div class="row justify-content-center">
+							<div class="col-xl-4 col-lg-5 col-md-6">
+								<div class="list_home">
+									<div class="list_title">
+										<i class="icon_pin_alt"></i>
+										<h3>Search by City or Zone</h3>
+									</div>
+									<ul>
+										<li><a href="/list"><strong>23</strong>Albany</a></li>
+										<li><a href="/list"><strong>23</strong>Albuquerque</a></li>
+										<li><a href="/list"><strong>23</strong>Atlanta</a></li>
+										<li><a href="/list"><strong>23</strong>Baltimore</a></li>
+										<li><a href="/list"><strong>23</strong>Baton Rouge</a></li>
+										<li><a href="/list"><strong>23</strong>Birmingham</a></li>
+										<li><a href="/list"><strong>23</strong>Boston</a></li>
+										<li><a href="/list"><strong>23</strong>Buffalo</a></li>
+										<li><a href="/list"><strong>23</strong>Charleston</a></li>
+										<li><a href="/list">More...</a></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-xl-4 col-lg-5 col-md-6">
+								<div class="list_home">
+									<div class="list_title">
+										<i class="icon_archive_alt"></i>
+										<h3>Search by type</h3>
+									</div>
+									<ul>
+										<li><a href="/list"><strong>23</strong>Allergist</a></li>
+										<li><a href="/list"><strong>23</strong>Cardiologist</a></li>
+										<li><a href="/list"><strong>23</strong>Chiropractor</a></li>
+										<li><a href="/list"><strong>23</strong>Dentist</a></li>
+										<li><a href="/list"><strong>23</strong>Dermatologist</a></li>
+										<li><a href="/list"><strong>23</strong>Gastroenterologist</a></li>
+										<li><a href="/list"><strong>23</strong>Ophthalmologist</a></li>
+										<li><a href="/list"><strong>23</strong>Optometrist</a></li>
+										<li><a href="/list"><strong>23</strong>Pediatrician</a></li>
+										<li><a href="/list">More....</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>-->
+					
+					<!-- /container -->
+					<!--<div id="app_section">
+						<div class="container">
+							<div class="row justify-content-around">
+								<div class="col-md-5">
+									<p><img src="./img/app_img.svg" alt="" class="img-fluid" width="500" height="433"></p>
+								</div>
+								<div class="col-md-6">
+									<small>Поддержка мобильных устройств</small>
+									<h3>Скачайте наше <strong>приложение</strong></h3>
+									<p class="lead">У нас имеется универсальное мобильное приложение, и оно уже доступно для скачивания</p>
+									<div class="app_buttons wow animated" data-wow-offset="100" style="visibility: visible;">
+										<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 43.1 85.9" style="enable-background:new 0 0 43.1 85.9;" xml:space="preserve">
+											<path stroke-linecap="round" stroke-linejoin="round" class="st0 draw-arrow" d="M11.3,2.5c-5.8,5-8.7,12.7-9,20.3s2,15.1,5.3,22c6.7,14,18,25.8,31.7,33.1"></path>
+											<path stroke-linecap="round" stroke-linejoin="round" class="draw-arrow tail-1" d="M40.6,78.1C39,71.3,37.2,64.6,35.2,58"></path>
+											<path stroke-linecap="round" stroke-linejoin="round" class="draw-arrow tail-2" d="M39.8,78.5c-7.2,1.7-14.3,3.3-21.5,4.9"></path>
+										</svg>
+										<a href="#" class="fadeIn"><img src="./img/apple_app.png" alt="" width="150" height="50" data-retina="true"></a>
+										<a href="#" class="fadeIn"><img src="./img/google_play_app.png" alt="" width="150" height="50" data-retina="true"></a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>-->
+					<!-- /app_section -->
+				</main>
+				<!-- /main content -->
+				<!--<footer>
+					<div class="container margin_60_35">
+						<div class="row">
+							<div class="col-lg-3 col-md-12">
+								<p>
+									<a href="/" title="2D Systems">
+									<img src="./img/logo.jpg" data-retina="true" alt="2D Systems" width="163" height="36" class="img-fluid">
+									</a>
+								</p>
+							</div>
+							<div class="col-lg-3 col-md-4">
+								<h5>Подробнее</h5>
+								<ul class="links">
+									<li><a href="#">О нас</a></li>
+									<li><a href="/blog">Блог</a></li>
+									<li><a href="#">FAQ</a></li>
+									<li><a href="/login">Войти</a></li>
+									<li><a href="/register">Регистрация</a></li>
+								</ul>
+							</div>
+							<div class="col-lg-3 col-md-4">
+								<h5>Useful links</h5>
+								<ul class="links">
+									<li><a href="#">Кнопка</a></li>
+									<li><a href="#">Кнопка 2</a></li>
+									<li><a href="#">Специализации</a></li>
+									<li><a href="#">Войти как пользователь</a></li>
+									<li><a href="#">Скачать приложение</a></li>
+								</ul>
+							</div>
+							<div class="col-lg-3 col-md-4">
+								<h5>Contact with Us</h5>
+								<ul class="contacts">
+									<li><a href="tel://79876543210"><i class="icon_mobile"></i> +7(987)654-32-10</a></li>
+									<li><a href="mailto:help@2d.su"><i class="icon_mail_alt"></i> help@2d.su</a></li>
+								</ul>
+								<div class="follow_us">
+									<h5>Follow us</h5>
+									<ul>
+										<li><a href="//facebook.com"><i class="social_facebook"></i></a></li>
+										<li><a href="//twitter.com"><i class="social_twitter"></i></a></li>
+										<li><a href="//linkedin.com"><i class="social_linkedin"></i></a></li>
+										<li><a href="//instagram.com"><i class="social_instagram"></i></a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						
+						<hr>
+						<div class="row">
+							<div class="col-md-8">
+								<ul id="additional_links">
+									<li><a href="#">Правила и политика использования</a></li>
+									<li><a href="#">Приватность</a></li>
+								</ul>
+							</div>
+							<div class="col-md-4">
+								<div id="copy">© 2D Systems</div>
+							</div>
+						</div>
+					</div>
+				</footer>-->
+			</div>
+			<div id="toTop" style="display: none;"></div>
+		</div>
+		<!-- /Preload-->
+		<!-- page -->
+		<!-- Back to top button -->
+		<!-- COMMON SCRIPTS -->
+		<script src="./js/common_scripts.min.js"></script>
+		<script src="./js/functions.js"></script>
+		<div id="preloader" class="mm-slideout" style="display: none;">
+			<div data-loader="circle-side" style="display: none;"></div>
+		</div>
+		<div id="mm-blocker" class="mm-slideout"></div>
+	</body>
 </html>
