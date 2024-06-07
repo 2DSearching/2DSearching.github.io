@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -99,6 +99,23 @@
 			display: block;
 			padding: 2px 0;
 			text-align: center;
+			}
+		</style>
+		<style>
+			#suggestions {
+				position: absolute;
+				z-index: 1000;
+				background: black;
+				border: 1px solid #ccc;
+				max-height: 200px;
+				overflow-y: auto;
+			}
+			.suggestion-item {
+				padding: 5px;
+				cursor: pointer;
+			}
+			.suggestion-item:hover {
+				background-color: #f0f0f0;
 			}
 		</style>
 		<script src="./js/jquery-3.6.0.min.js"></script>
@@ -293,9 +310,7 @@
 							</div>-->
 						</div>
 					</div>
-					<!-- /container -->
 				</header>
-				<!-- /header -->
 				<main>
 					<div class="hero_home version_1">
 						<div class="content">
@@ -321,8 +336,6 @@
 													search_type = $(el).val();
 												}
 											});
-											
-											
 											
 											if (search_service=="google") {
 												if (search_type=="sites") {
@@ -398,6 +411,7 @@
 									<!--<div class="gcse-search">
 										<script async src="https://cse.google.com/cse.js?cx=9776c0ead13a14742"></script>
 									</div>-->
+									<div id="suggestions"></div>
 									<br>
 									<ul>
 										Тип поиска:<br>
@@ -430,7 +444,6 @@
 										</li>
 									</ul>
 								</div>
-							<!--</form>-->
 						</div>
 					</div>
 					<!-- /Hero -->
@@ -777,10 +790,42 @@
 			</div>
 			<div id="toTop" style="display: none;"></div>
 		</div>
-		<!-- /Preload-->
-		<!-- page -->
-		<!-- Back to top button -->
-		<!-- COMMON SCRIPTS -->
+		<script>
+			$(function () {
+				$('#search-query').on('input', function () {
+					let query = $(this).val();
+					if (query.length >= 2) {
+						getSuggestions(query);
+					} else {
+						$('#suggestions').empty();
+					}
+				});
+			});
+	
+			function getSuggestions(query) {
+				$.ajax({
+					url: `https://suggest.yandex.net/suggest-ya.cgi?srv=morda_ru&part=${query}&hl=ru&uil=ru&v=4&callback=?`,
+					dataType: "jsonp",
+					success: function (data) {
+						let suggestions = data[1] || [];
+						$('#suggestions').empty();
+						suggestions.forEach(suggestion => {
+							$('#suggestions').append(`<div class="suggestion-item">${suggestion}</div>`);
+						});
+	
+						$('.suggestion-item').on('click', function () {
+							$('#search-query').val($(this).text());
+							$('#suggestions').empty();
+						});
+					}
+				});
+			}
+		</script>
+		<!-- Yandex.RTB -->
+<script>window.yaContextCb=window.yaContextCb||[]</script>
+<script src="https://yandex.ru/ads/system/context.js" async></script>
+</head>
+<body>
 		<script src="./js/common_scripts.min.js"></script>
 		<script src="./js/functions.js"></script>
 		<div id="preloader" class="mm-slideout" style="display: none;">
